@@ -8,6 +8,7 @@ use EventSauce\EventSourcing\ExplicitlyMappedClassNameInflector;
 use EventSauce\EventSourcing\MessageDecoratorChain;
 use EventSauce\EventSourcing\MessageDispatcherChain;
 use EventSauce\EventSourcing\Serialization\ConstructingMessageSerializer;
+use EventSauce\EventSourcing\Serialization\ObjectMapperPayloadSerializer;
 use EventSauce\MessageRepository\TableSchema\DefaultTableSchema;
 use EventSauce\UuidEncoding\BinaryUuidEncoder;
 use Illuminate\Database\DatabaseManager;
@@ -26,7 +27,8 @@ class WalletServiceProvider extends ServiceProvider
                 connection: $application->make(DatabaseManager::class)->connection(),
                 tableName: 'wallet_messages',
                 serializer: new ConstructingMessageSerializer(
-                    new ExplicitlyMappedClassNameInflector(config('eventsourcing.class_map'))
+                    classNameInflector: new ExplicitlyMappedClassNameInflector(config('eventsourcing.class_map')),
+                    payloadSerializer: new ObjectMapperPayloadSerializer(),
                 ),
                 tableSchema: new DefaultTableSchema(),
                 uuidEncoder: new BinaryUuidEncoder(),
