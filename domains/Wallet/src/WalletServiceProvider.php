@@ -4,6 +4,7 @@ namespace Workshop\Domains\Wallet;
 
 use EventSauce\EventSourcing\DefaultHeadersDecorator;
 use EventSauce\EventSourcing\DotSeparatedSnakeCaseInflector;
+use EventSauce\EventSourcing\ExplicitlyMappedClassNameInflector;
 use EventSauce\EventSourcing\MessageDecoratorChain;
 use EventSauce\EventSourcing\MessageDispatcherChain;
 use EventSauce\EventSourcing\Serialization\ConstructingMessageSerializer;
@@ -24,7 +25,9 @@ class WalletServiceProvider extends ServiceProvider
             return new WalletMessageRepository(
                 connection: $application->make(DatabaseManager::class)->connection(),
                 tableName: 'wallet_messages',
-                serializer: new ConstructingMessageSerializer(),
+                serializer: new ConstructingMessageSerializer(
+                    new ExplicitlyMappedClassNameInflector(config('eventsourcing.class_map'))
+                ),
                 tableSchema: new DefaultTableSchema(),
                 uuidEncoder: new BinaryUuidEncoder(),
             );
