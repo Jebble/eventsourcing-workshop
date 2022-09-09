@@ -1,5 +1,6 @@
 <?php
 
+use Workshop\Domains\Wallet\Wallet;
 use Workshop\Domains\Wallet\WalletId;
 use Workshop\Domains\Wallet\Events\TokensDeposited;
 use Workshop\Domains\Wallet\Events\TokensWithdrawn;

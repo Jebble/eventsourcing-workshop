@@ -22,12 +22,14 @@ class WalletServiceProvider extends ServiceProvider
 {
     public function register()
     {
-        $this->app->bind(WalletMessageRepository::class, function (Application $application) {
+        $classNameInflector = new ExplicitlyMappedClassNameInflector(config('eventsourcing.class_map'));
+
+        $this->app->bind(WalletMessageRepository::class, function (Application $application) use ($classNameInflector) {
             return new WalletMessageRepository(
                 connection: $application->make(DatabaseManager::class)->connection(),
                 tableName: 'wallet_messages',
                 serializer: new ConstructingMessageSerializer(
-                    classNameInflector: new ExplicitlyMappedClassNameInflector(config('eventsourcing.class_map')),
+                    classNameInflector: $classNameInflector,
                     payloadSerializer: new ObjectMapperPayloadSerializer(),
                 ),
                 tableSchema: new DefaultTableSchema(),
@@ -35,15 +37,17 @@ class WalletServiceProvider extends ServiceProvider
             );
         });
 
-        $this->app->bind(WalletRepository::class, function () {
+        $this->app->bind(WalletRepository::class, function () use ($classNameInflector) {
             return new WalletRepository(
                 $this->app->make(WalletMessageRepository::class),
-                new MessageDispatcherChain(),
-                new MessageDecoratorChain(
-                    new DefaultHeadersDecorator(),
+                dispatcher: new MessageDispatcherChain(),
+                decorator: new MessageDecoratorChain(
+                    new DefaultHeadersDecorator(
+                        inflector: $classNameInflector
+                    ),
                     new WalletDecorator()
                 ),
-                new DotSeparatedSnakeCaseInflector(),
+                classNameInflector: $classNameInflector,
             );
         });
     }
