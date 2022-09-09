@@ -8,7 +8,7 @@ use Workshop\Domains\Wallet\Tests\WalletTestCase;
 use Workshop\Domains\Wallet\Wallet;
 use Workshop\Domains\Wallet\WithdrawalFailureType;
 
-class DepositTokensTest extends WalletTestCase
+class WalletTest extends WalletTestCase
 {
     /** @test */
     public function it_can_deposit_tokens()

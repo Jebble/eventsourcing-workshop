@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use Assert\Assert;
 use Illuminate\Console\Command;
 use Workshop\Domains\Wallet\Exceptions\SorryCantWithdraw;
+use Workshop\Domains\Wallet\Exceptions\TokenWithdrawalException;
 use Workshop\Domains\Wallet\Infra\WalletRepository;
 use Workshop\Domains\Wallet\WalletId;
 
@@ -46,12 +47,12 @@ class Wallet extends Command
 
         $wallet = $walletRepository->retrieve($walletId);
         try {
-            if($action === 'Deposit'){
+            if ($action === 'Deposit') {
                 $wallet->deposit($tokens);
             } else {
                 $wallet->withdraw($tokens);
             }
-        } catch (SorryCantWithdraw $exception) {
+        } catch (TokenWithdrawalException $exception) {
             $this->error($exception->getMessage());
             return 1;
         } finally {
