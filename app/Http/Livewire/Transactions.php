@@ -5,6 +5,7 @@ namespace App\Http\Livewire;
 use Workshop\Domains\Wallet\ReadModels\Transaction;
 use Livewire\Component;
 use Workshop\Domains\Wallet\Infra\WalletRepository;
+use Workshop\Domains\Wallet\ReadModels\Wallet;
 use Workshop\Domains\Wallet\WalletId;
 
 class Transactions extends Component
@@ -26,7 +27,6 @@ class Transactions extends Component
 
     public function deposit(WalletRepository $walletRepository)
     {
-
         $wallet = $walletRepository->retrieve(WalletId::fromString($this->walletId));
         $wallet->deposit($this->tokens);
         $walletRepository->persist($wallet);
@@ -54,6 +54,7 @@ class Transactions extends Component
     {
         return view('livewire.transactions', [
             'transactions' => Transaction::forWallet($this->walletId)->orderBy('transacted_at', 'desc')->paginate(10),
+            'balance' => Wallet::find($this->walletId)->balance ?? 0,
         ]);
     }
 }

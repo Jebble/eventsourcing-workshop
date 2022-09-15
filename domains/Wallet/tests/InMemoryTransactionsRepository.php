@@ -7,7 +7,6 @@ use Workshop\Domains\Wallet\Infra\TransactionsReadModelRepository;
 
 class InMemoryTransactionsRepository implements TransactionsReadModelRepository
 {
-
     private array $transactions = [];
 
     public function addTransaction(string $eventId, string $walletId, int $amount, Carbon $transactedAt): void
