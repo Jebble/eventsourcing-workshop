@@ -4,12 +4,19 @@ namespace Workshop\Domains\Wallet\Tests;
 
 use EventSauce\EventSourcing\AggregateRoot;
 use EventSauce\EventSourcing\AggregateRootId;
+use EventSauce\EventSourcing\ClassNameInflector;
+use EventSauce\EventSourcing\ExplicitlyMappedClassNameInflector;
+use EventSauce\EventSourcing\Serialization\ObjectMapperPayloadSerializer;
+use EventSauce\EventSourcing\Serialization\PayloadSerializer;
 use EventSauce\EventSourcing\TestUtilities\AggregateRootTestCase;
+use Tests\CreatesApplication;
 use Workshop\Domains\Wallet\Wallet;
 use Workshop\Domains\Wallet\WalletId;
 
 abstract class WalletTestCase extends AggregateRootTestCase
 {
+    use CreatesApplication;
+
     protected function newAggregateRootId(): AggregateRootId
     {
         return WalletId::generate();
@@ -34,4 +41,8 @@ abstract class WalletTestCase extends AggregateRootTestCase
         }
     }
 
+    protected function payloadSerializer(): PayloadSerializer
+    {
+        return new ObjectMapperPayloadSerializer();
+    }
 }
