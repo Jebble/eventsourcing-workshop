@@ -24,4 +24,12 @@ class EloquentWalletsReadModelRepository implements WalletsReadModelRepository
         $wallet->balance -= $amount;
         $wallet->save();
     }
+
+    public function getBalance(string $walletId): int
+    {
+        $wallet = Wallet::firstOrFail(
+            ['wallet_id' => $walletId]
+        );
+        return $wallet->balance;
+    }
 }

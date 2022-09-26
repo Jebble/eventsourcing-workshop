@@ -15,4 +15,8 @@ interface WalletsReadModelRepository
         string $walletId,
         int $amount
     ): void;
+
+    public function getBalance(
+        string $walletId,
+    ): int;
 }

@@ -18,7 +18,7 @@ class InMemoryWalletsRepository implements WalletsReadModelRepository
         $this->balance -= $amount;
     }
 
-    public function getBalance(): int
+    public function getBalance(string $walletId): int
     {
         return $this->balance;
     }

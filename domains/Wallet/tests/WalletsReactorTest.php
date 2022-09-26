@@ -21,12 +21,30 @@ class WalletsReactorTest extends MessageConsumerTestCase
     public function setUp(): void
     {
         $this->walletId = WalletId::generate();
-        $this->notificationService = new InMemoryNotificationService();
         parent::setup();
     }
 
     /** @test */
-    public function it_sends_notification(): void
+    public function it_does_not_send_notification_if_balance_below_100(): void
+    {
+        $this
+            ->givenNextMessagesHaveAggregateRootIdOf($this->walletId)
+            ->when(
+                (new Message(
+                    new TokensDeposited(10)
+                ))->withHeaders([
+                    Header::EVENT_ID => 'event-id',
+                    Header::TIME_OF_RECORDING => '2022-09-08 13:16:35.790434+0000',
+                    Header::TIME_OF_RECORDING_FORMAT => 'Y-m-d H:i:s.uO'
+                ])
+            )
+            ->then(function () {
+                $this->assertFalse($this->notificationService->notificationSendExactlyOnceForWallet($this->walletId));
+            });
+    }
+
+    /** @test */
+    public function it_sends_notification_if_balance_goes_above_100(): void
     {
         $this
             ->givenNextMessagesHaveAggregateRootIdOf($this->walletId)
@@ -40,18 +58,19 @@ class WalletsReactorTest extends MessageConsumerTestCase
                 ])
             )
             ->then(function () {
-                dd($this->walletsRepository->getBalance());
+                $this->assertTrue($this->notificationService->notificationSendExactlyOnceForWallet($this->walletId));
             });
     }
 
     /** @test */
-    public function it_adds_a_transaction_to_the_transactions_on_withdrawal(): void
+    public function it_doesnt_send_notification_if_already_above_100(): void
     {
+        // This is flaky, the balance for `given` isn't 101 in the `when`
         $this
             ->givenNextMessagesHaveAggregateRootIdOf($this->walletId)
             ->given(
                 (new Message(
-                    new TokensDeposited(10)
+                    new TokensDeposited(101)
                 ))->withHeaders([
                     Header::EVENT_ID => 'event-id',
                     Header::TIME_OF_RECORDING => '2022-09-08 13:16:35.790434+0000',
@@ -60,7 +79,7 @@ class WalletsReactorTest extends MessageConsumerTestCase
             )
             ->when(
                 (new Message(
-                    new TokensWithdrawn(5)
+                    new TokensDeposited(10)
                 ))->withHeaders([
                     Header::EVENT_ID => 'event-id',
                     Header::TIME_OF_RECORDING => '2022-09-08 13:16:50.790434+0000',
@@ -68,13 +87,14 @@ class WalletsReactorTest extends MessageConsumerTestCase
                 ])
             )
             ->then(function () {
-                $this->assertEquals(5, $this->walletsRepository->getBalance());
+                $this->assertTrue($this->notificationService->notificationSendExactlyOnceForWallet($this->walletId));
             });
     }
 
     public function messageConsumer(): MessageConsumer
     {
         $this->walletsRepository = new InMemoryWalletsRepository();
-        return new WalletsProjector($this->walletsRepository);
+        $this->notificationService = new InMemoryNotificationService();
+        return new WalletsReactor($this->walletsRepository, $this->notificationService);
     }
 }

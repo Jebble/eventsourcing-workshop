@@ -7,7 +7,6 @@ use Workshop\Domains\Wallet\WalletId;
 
 class InMemoryNotificationService implements NotificationService
 {
-
     private array $notifications = [];
 
     public function sendWalletHighBalanceNotification(WalletId $walletId): void

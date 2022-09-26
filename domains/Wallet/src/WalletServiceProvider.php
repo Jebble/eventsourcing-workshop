@@ -21,6 +21,7 @@ use Workshop\Domains\Wallet\Infra\WalletMessageRepository;
 use Workshop\Domains\Wallet\Infra\WalletRepository;
 use Workshop\Domains\Wallet\Projectors\TransactionsProjector;
 use Workshop\Domains\Wallet\Projectors\WalletsProjector;
+use Workshop\Domains\Wallet\Reactors\WalletsReactor;
 
 class WalletServiceProvider extends ServiceProvider
 {
@@ -47,7 +48,8 @@ class WalletServiceProvider extends ServiceProvider
                 dispatcher: new MessageDispatcherChain(
                     new SynchronousMessageDispatcher(
                         $this->app->make(TransactionsProjector::class),
-                        $this->app->make(WalletsProjector::class)
+                        $this->app->make(WalletsProjector::class),
+                        $this->app->make(WalletsReactor::class)
                     )
                 ),
                 decorator: new MessageDecoratorChain(
