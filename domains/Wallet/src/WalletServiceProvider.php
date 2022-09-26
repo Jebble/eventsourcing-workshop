@@ -10,6 +10,8 @@ use EventSauce\EventSourcing\MessageDispatcherChain;
 use EventSauce\EventSourcing\Serialization\ConstructingMessageSerializer;
 use EventSauce\EventSourcing\Serialization\ObjectMapperPayloadSerializer;
 use EventSauce\EventSourcing\SynchronousMessageDispatcher;
+use EventSauce\EventSourcing\Upcasting\UpcasterChain;
+use EventSauce\EventSourcing\Upcasting\UpcastingMessageSerializer;
 use EventSauce\MessageRepository\TableSchema\DefaultTableSchema;
 use EventSauce\UuidEncoding\BinaryUuidEncoder;
 use Illuminate\Database\DatabaseManager;
@@ -22,6 +24,7 @@ use Workshop\Domains\Wallet\Infra\WalletRepository;
 use Workshop\Domains\Wallet\Projectors\TransactionsProjector;
 use Workshop\Domains\Wallet\Projectors\WalletsProjector;
 use Workshop\Domains\Wallet\Reactors\WalletsReactor;
+use Workshop\Domains\Wallet\Upcasters\TransactedAtUpcaster;
 
 class WalletServiceProvider extends ServiceProvider
 {
@@ -33,9 +36,14 @@ class WalletServiceProvider extends ServiceProvider
             return new WalletMessageRepository(
                 connection: $application->make(DatabaseManager::class)->connection(),
                 tableName: 'wallet_messages',
-                serializer: new ConstructingMessageSerializer(
-                    classNameInflector: $classNameInflector,
-                    payloadSerializer: new ObjectMapperPayloadSerializer(),
+                serializer: new UpcastingMessageSerializer(
+                    eventSerializer: new ConstructingMessageSerializer(
+                        classNameInflector: $classNameInflector,
+                        payloadSerializer: new ObjectMapperPayloadSerializer(),
+                    ),
+                    upcaster: new UpcasterChain(
+                        upcasters: new TransactedAtUpcaster()
+                    )
                 ),
                 tableSchema: new DefaultTableSchema(),
                 uuidEncoder: new BinaryUuidEncoder(),

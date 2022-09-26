@@ -23,7 +23,8 @@ final class TransactionsProjector extends EventConsumer
             $message->headers()[Header::EVENT_ID],
             $message->aggregateRootId()->toString(),
             $event->tokens,
-            Carbon::createFromImmutable($message->timeOfRecording())
+            Carbon::createFromImmutable($message->timeOfRecording()),
+            $event->description ?? 'unknown'
         );
     }
 
@@ -32,8 +33,9 @@ final class TransactionsProjector extends EventConsumer
         $this->transactionsReadModelRepository->addTransaction(
             $message->headers()[Header::EVENT_ID],
             $message->aggregateRootId()->toString(),
-            $event->tokens,
-            Carbon::createFromImmutable($message->timeOfRecording())
+            -$event->tokens,
+            Carbon::createFromImmutable($message->timeOfRecording()),
+            $event->description ?? 'unknown'
         );
     }
 }

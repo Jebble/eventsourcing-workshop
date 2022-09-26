@@ -44,11 +44,28 @@ class TransactedAtUpcasterTest extends TestCase
     }
 
     /** @test */
-    public function events_without_transacted_at_will_get_recorded_at_as_transacted_at()
+    public function tokens_deposited_events_without_transacted_at_will_get_recorded_at_as_transacted_at()
     {
         $input = [
             'headers' => [
                 '__event_type' => 'tokens_deposited',
+                '__time_of_recording' => '2022-09-15 17:09:42.410100+0000',
+            ],
+            'payload' => [
+            ]
+        ];
+        $output = $this->upcast($input);
+
+        $input['payload']['transacted_at'] = $input['headers']['__time_of_recording'];
+        $this->assertEquals($output, $input);
+    }
+
+    /** @test */
+    public function tokens_withdrawn_events_without_transacted_at_will_get_recorded_at_as_transacted_at()
+    {
+        $input = [
+            'headers' => [
+                '__event_type' => 'tokens_withdrawn',
                 '__time_of_recording' => '2022-09-15 17:09:42.410100+0000',
             ],
             'payload' => [
